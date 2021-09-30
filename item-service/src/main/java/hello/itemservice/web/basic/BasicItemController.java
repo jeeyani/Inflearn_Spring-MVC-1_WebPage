@@ -6,6 +6,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
 import javax.annotation.PostConstruct;
 import java.util.List;
 
@@ -90,12 +92,40 @@ public class BasicItemController {
 	* @ModelAttribute 자체 생략 가능
 	* model.addAttribute(item) 자동 추가
 	*/
-	@PostMapping("/add")
+	//@PostMapping("/add")
 	public String addItemV4(Item item) {
 		itemRepository.save(item);
 		return "basic/item";
 	}
+	
+	/*
+	 * 상품등록 폼 redirect로 전달하기
+	 */
+	//@PostMapping("/add")
+	public String addItemV5(Item item) {
+		itemRepository.save(item);
+		
+		//return "basic/item";
+		
+		/*  */
+		return "redirect:/basic/items/"+item.getId();
+	}
 
+	/**
+	* RedirectAttributes
+	*/
+	@PostMapping("/add")
+	public String addItemV6(Item item, RedirectAttributes redirectAttributes) {
+		
+		Item savedItem = itemRepository.save(item);
+		redirectAttributes.addAttribute("itemId", savedItem.getId());
+		redirectAttributes.addAttribute("status", true); //저장확인 >>쿼리파라미터 형식으로 들어감 (?status=true)
+		
+		return "redirect:/basic/items/{itemId}";
+	}
+	
+	
+	
 	//상품수정 -GET
 	@GetMapping("/{itemId}/edit")
 	public String editForm(@PathVariable Long itemId, Model model) {
@@ -113,6 +143,7 @@ public class BasicItemController {
 		//상품상세로 이동!!
 		return "redirect:/basic/items/{itemId}";
 	}
+	
 	
 	/**
 	 * 테스트용 데이터 추가
